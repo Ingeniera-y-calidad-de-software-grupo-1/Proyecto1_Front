@@ -21,6 +21,9 @@ import {
   TituloAlertaConfirmacion,
   useConfirmation,
 } from "../../../herramientas/alertas/alertas-confirmacion";
+import Select from "react-select";
+import SuperlineaService from "../services/superlinea-service";
+import { SelectSuperlinea } from "../../../../interfaces/gestion-producto/superlinea/interfaces-superlinea";
 
 export default function RegistrarActualizarLineaForm({
   linea,
@@ -34,11 +37,20 @@ export default function RegistrarActualizarLineaForm({
   const usuarioId = getUsuarioId();
   const { showConfirmation, AlertasConfirmacion } = useConfirmation();
   const [rStockCritico, setStockCritico] = useState(false);
+  const [superlineas, setSuperlineas] = useState<SelectSuperlinea[]>([]);
 
   const methods = useForm<FormValues>({
-    resolver: yupResolver(schema(rStockCritico)) as any,
-    defaultValues: linea ? transformData(linea) : {},
-  });
+  resolver: yupResolver(schema(rStockCritico)) as any,
+  defaultValues: linea
+    ? transformData(linea)
+    : {
+        denominacion: "",
+        observacion: null,
+        stockMinimo: 0,
+        utilizaStockMinimo: false,
+        superLineaId: 0,
+      },
+});
 
   const {
     handleSubmit,
@@ -51,6 +63,20 @@ export default function RegistrarActualizarLineaForm({
  
   const stockMinimo = watch("stockMinimo");
   const utilizaStockMinimo = watch("utilizaStockMinimo");
+  const superLineaId = watch("superLineaId");
+
+  useEffect(() => {
+  const cargarSuperlineas = async () => {
+    try {
+      const data = await SuperlineaService.obtenerTodas();
+      setSuperlineas(data);
+    } catch (error) {
+      console.error("Error al obtener las SuperLíneas:", error);
+    }
+  };
+
+  cargarSuperlineas();
+}, []);
 
   useEffect(() => {
     if (!utilizaStockMinimo) {
@@ -70,7 +96,7 @@ export default function RegistrarActualizarLineaForm({
           setValue("observacion", linea.observacion || null);
           setValue("stockMinimo", linea.stockMinimo || 0);
           setValue("utilizaStockMinimo", linea.utilizaStockMinimo || false);
-          
+          setValue("superLineaId", linea.superLinea.id);
         }
       } catch (error) {
         console.error("Error al obtener los datos:", error);
@@ -152,6 +178,42 @@ export default function RegistrarActualizarLineaForm({
                     onChange={(value) => setValue("stockMinimo", Number(value))}
                     disabled={utilizaStockMinimo ? false : true}
                   />
+                </div>
+
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    SuperLínea
+                  </label>
+
+                  <Select
+                    value={
+                      superlineas.find(
+                        (superlinea) => superlinea.id === superLineaId
+                      ) ?? null
+                    }
+                    options={superlineas}
+                    getOptionLabel={(option) => option.denominacion}
+                    getOptionValue={(option) => String(option.id)}
+                    onChange={(option) =>
+                      setValue("superLineaId", option?.id ?? 0, {
+                        shouldValidate: true,
+                      })
+                    }
+                    placeholder="Seleccione una SuperLínea"
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
+                  />
+
+                  {errors.superLineaId?.message && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.superLineaId.message}
+                    </p>
+                  )}
                 </div>
               </CardContent>
               {errors.root?.message && (
