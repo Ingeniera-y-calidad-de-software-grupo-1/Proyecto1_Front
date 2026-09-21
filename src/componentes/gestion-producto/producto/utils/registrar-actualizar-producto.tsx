@@ -90,9 +90,18 @@ export default function RegistrarActualizarProductoForm({
   const cantidadPorPack = watch("cantidadPorPack");
   const utilizaStockMinimo = watch("utilizaStockMinimo");
   const utilizaPack = watch("utilizaPack");
-  
 
-  //=============================== CONSTANTES PARA MOVIMIENTO ENTRE CAMPOS ==================================
+  const costo = watch("costo");
+  const porcentaje = watch("porcentaje");
+
+  // Fórmula unificada de dominio para vista previa visual: Precio = Costo * (1 + Margen / 100)
+  const costoNum = typeof costo === "number" ? costo : Number(costo) || 0;
+  const porcentajeNum = typeof porcentaje === "number" ? porcentaje : Number(porcentaje) || 0;
+  const precioCalculado = costoNum > 0 ? costoNum * (1 + porcentajeNum / 100) : 0;
+
+  useEffect(() => {
+    setValue("precio", precioCalculado, { shouldValidate: true });
+  }, [precioCalculado, setValue]);
   const denominacionProductoRef = useRef<HTMLInputElement>(null);
   useEnterFocus(denominacionProductoRef);
   const observacionRef = useRef<HTMLInputElement>(null);
@@ -148,8 +157,10 @@ export default function RegistrarActualizarProductoForm({
           setValue("observacion", producto.observacion || null);
           setValue("codigoProveedor", producto.codigoProveedor || "");
           setValue("codigoBarra", producto.codigoBarra || null);
-          setValue("stock", producto.stock || 0);
-          setValue("costo", producto.costo || 0);
+          setValue("stock", producto.stock ?? 0);
+          setValue("costo", producto.costo ?? 0);
+          setValue("porcentaje", producto.porcentaje ?? 0);
+          setValue("precio", producto.precio ?? 0);
           
           //setValue("oferta", producto.oferta || false);
           setValue("alicuotaIva", producto.alicuotaIva || 0);
@@ -371,20 +382,21 @@ export default function RegistrarActualizarProductoForm({
                     maxDigits={9}
                     disabled={producto && producto.sistema > 0 ? true : false}
                   />
-                  <PriceInput
-                    name="precio"
-                    label="Precio"
-                    value={watch("precio") || 0}
-                    onChange={(value) => setValue("precio", value, { shouldValidate: true })}
-                    maxDigits={9}
-                    disabled={producto && producto.sistema > 0 ? true : false}
-                  />
                   <PorcentajeInput
                     name="porcentaje"
-                    label="Porcentaje"
+                    label="Margen (%)"
                     value={watch("porcentaje") || 0}
                     onChange={(value) => setValue("porcentaje", value, { shouldValidate: true })}
+                    maxPercent={null}
                     disabled={producto && producto.sistema > 0 ? true : false}
+                  />
+                  <PriceInput
+                    name="precio"
+                    label="Precio (Calculado)"
+                    value={precioCalculado}
+                    onChange={() => {}}
+                    maxDigits={9}
+                    disabled={true}
                   />
 
                   
@@ -447,15 +459,14 @@ export default function RegistrarActualizarProductoForm({
                   </div>
 
                   <div className="flex-1 min-w-[120px]">
-                    {producto ? (
-                      <CantidadesInput
-                        name={`stock`}
-                        label="Stock"
-                        value={stock || 0}
-                        onChange={(value) => setValue(`stock`, Number(value))}
-                        disabled={true}
-                      />
-                    ) : null}
+                    <CantidadesInput
+                      name={`stock`}
+                      label="Stock"
+                      value={stock || 0}
+                      onChange={(value) => setValue(`stock`, Number(value))}
+                      disabled={producto ? true : false}
+                      decimalScale={2}
+                    />
                   </div>
                 </div>
 
