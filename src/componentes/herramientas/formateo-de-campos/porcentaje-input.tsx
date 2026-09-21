@@ -9,6 +9,7 @@ interface PorcentajeInputProps {
   value: number;
   disabled?: boolean;
   className?: string;
+  maxPercent?: number | null;
   onChange: (value: number) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   inputRef?: React.Ref<HTMLInputElement>;
@@ -20,6 +21,7 @@ const PorcentajeInput: React.FC<PorcentajeInputProps> = ({
   value,
   disabled,
   className,
+  maxPercent = 999,
   onChange,
   onKeyDown,
   inputRef,
@@ -71,8 +73,11 @@ const PorcentajeInput: React.FC<PorcentajeInputProps> = ({
           allowNegative={false}
           disabled={disabled}
           isAllowed={(values) => {
+            if (maxPercent === null || maxPercent === undefined) {
+              return true;
+            }
             const current = values.floatValue ?? 0;
-            return current <= 999;
+            return current <= maxPercent;
           }}
           onValueChange={(values) => {
             onChange(values.floatValue ?? 0);
