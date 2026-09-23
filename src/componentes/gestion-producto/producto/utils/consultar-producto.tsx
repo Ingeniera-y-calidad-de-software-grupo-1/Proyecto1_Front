@@ -21,6 +21,7 @@ import {
 import { useFiltrosIniciales } from "../../../../hooks/useFiltrosIniciales";
 import { useCatalogosContext } from "../../../../context/catalogos-context";
 import { ProductosHeader } from "../componentes/header-producto";
+import { FiltrosProductoSuperior, FiltrosProductoSuperiorValues } from "../componentes/filtros-producto-superior";
 import { ProductosModales } from "../modales/producto-modales";
 import { usePaginacion } from "../../../../hooks/use-paginacion";
 import { PAGINACION } from "../../../../config/paginacion";
@@ -85,6 +86,45 @@ export default function ConsultarProductos() {
     setBusquedaRapida,
   } = useFiltrosContext();
 
+  // CR-004: Estado local para filtros superiores (Denominación, Línea, SuperLínea)
+  const [filtrosSuperiores, setFiltrosSuperiores] = useState<FiltrosProductoSuperiorValues>({
+    denominacion: "",
+    denominacionLinea: "",
+    denominacionSuperLinea: "",
+  });
+
+  const filtrosSuperioresRef = useRef(filtrosSuperiores);
+  filtrosSuperioresRef.current = filtrosSuperiores;
+
+  const handleBuscarDesdeFiltroSuperior = (nuevosFiltros: FiltrosProductoSuperiorValues) => {
+    setFiltrosSuperiores(nuevosFiltros);
+    filtrosSuperioresRef.current = nuevosFiltros;
+    if (nuevosFiltros.denominacion !== valoresFiltros.denominacion) {
+      setValoresFiltros((prev) => ({
+        ...prev,
+        denominacion: nuevosFiltros.denominacion,
+      }));
+    }
+    resetearPaginacion();
+    handleBuscarProductos(true, nuevosFiltros);
+  };
+
+  const handleLimpiarFiltroSuperior = () => {
+    const filtrosVacios: FiltrosProductoSuperiorValues = {
+      denominacion: "",
+      denominacionLinea: "",
+      denominacionSuperLinea: "",
+    };
+    setFiltrosSuperiores(filtrosVacios);
+    filtrosSuperioresRef.current = filtrosVacios;
+    setValoresFiltros((prev) => ({
+      ...prev,
+      denominacion: "",
+    }));
+    resetearPaginacion();
+    handleBuscarProductos(true, filtrosVacios);
+  };
+
   const filtrosInicialesConsultarProducto = useFiltrosIniciales("consultar-producto");
 
     // Contexto de catálogos
@@ -123,7 +163,15 @@ export default function ConsultarProductos() {
 
   useEffect(() => {
     if (buscar.cont > 0 && buscar.componente === "consultar-producto") {
-      handleBuscarProductos(true);
+      if (valoresFiltros.denominacion !== undefined) {
+        setFiltrosSuperiores((prev) => ({
+          ...prev,
+          denominacion: valoresFiltros.denominacion || "",
+        }));
+      }
+      handleBuscarProductos(true, {
+        denominacion: valoresFiltros.denominacion || "",
+      });
     }
   }, [buscar]);
 
@@ -355,26 +403,7 @@ export default function ConsultarProductos() {
     });
 
     setLoading(true);
-
-    const filtrosConPaginacion = {
-      denominacion: valoresFiltros.denominacion,
-      codigoProveedor: valoresFiltros.codigoProveedor,
-      codigoReferencia: valoresFiltros.codigoReferencia,
-      lineaId: valoresFiltros.lineaId,
-      marcaId: valoresFiltros.marcaId,
-      proveedorId: valoresFiltros.proveedorId,
-      conStock: valoresFiltros.conStock,
-      codReferenciaExacto: valoresFiltros.codReferenciaExacto,
-      codProveedorExacto: valoresFiltros.codProveedorExacto,
-      skip: skip,
-      take: take,
-    };
-
-    const productosFiltrados = await ProductoService.obtener(filtrosConPaginacion);
-
-    setEntidadesTotales(productosFiltrados.total);
-    setProductos(productosFiltrados.data);
-    setLoading(false);
+    await handleBuscarProductos();
   };
 
   const handleActualizarSuccess = async (mensajeAlerta: string) => {
@@ -393,15 +422,24 @@ export default function ConsultarProductos() {
     await handleBuscarProductos();
   };
 
-  const handleBuscarProductos = async (botonBuscar?: boolean) => {
+  const handleBuscarProductos = async (
+    botonBuscar?: boolean,
+    filtrosOverride?: Partial<FiltrosProductoSuperiorValues>,
+  ) => {
     setBusquedaRapida(false);
     if (botonBuscar) {
       resetearPaginacion();
     }
     setLoading(true);
 
+    const sup = filtrosOverride
+      ? { ...filtrosSuperioresRef.current, ...filtrosOverride }
+      : filtrosSuperioresRef.current;
+
     const filtrosConPaginacion = {
-      denominacion: valoresFiltros.denominacion,
+      denominacion: sup.denominacion || valoresFiltros.denominacion || undefined,
+      denominacionLinea: sup.denominacionLinea || undefined,
+      denominacionSuperLinea: sup.denominacionSuperLinea || undefined,
       codigoProveedor: valoresFiltros.codigoProveedor,
       codigoReferencia: valoresFiltros.codigoReferencia,
       codProveedorExacto: valoresFiltros.codProveedorExacto,
@@ -410,7 +448,7 @@ export default function ConsultarProductos() {
       marcaId: valoresFiltros.marcaId,
       proveedorId: valoresFiltros.proveedorId,
       conStock: valoresFiltros.conStock,
-      skip: skip,
+      skip: botonBuscar ? 0 : skip,
       take: take,
     };
 
@@ -546,6 +584,12 @@ export default function ConsultarProductos() {
               </div>
 
               <CardContent className="p-0">
+                {/* CR-004: Buscador superior por Denominación, Línea y SuperLínea */}
+                <FiltrosProductoSuperior
+                  valoresIniciales={filtrosSuperiores}
+                  onBuscar={handleBuscarDesdeFiltroSuperior}
+                  onLimpiar={handleLimpiarFiltroSuperior}
+                />
                 <FiltrosAplicados />
                 <DatosTabla
                   productos={productos}
