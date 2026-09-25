@@ -127,24 +127,33 @@ export default function RegistrarActualizarProductoForm({
   const presentacion = watch("presentacion");
 
   const nombreMarca =
-    marcas.find((m) => m.id === marcaId)?.denominacion ||
     selectedMarca?.denominacion ||
+    marcas.find((m) => m.id === marcaId)?.denominacion ||
     "";
   const nombreLinea =
-    lineas.find((l) => l.id === lineaId)?.denominacion ||
     selectedLinea?.denominacion ||
+    lineas.find((l) => l.id === lineaId)?.denominacion ||
     lineaSeleccionada?.denominacion ||
     "";
 
   // CR-005: Sugerencia reactiva en alta mientras el campo continúe en modo automático
   useEffect(() => {
-    if (esAlta && !isManual) {
-      const sugerencia = [nombreMarca, nombreLinea, presentacion]
-        .map((v) => v?.trim())
-        .filter(Boolean)
-        .join(" ");
+    if (!esAlta || isManual) return;
 
+    const marcaLimpia = nombreMarca?.trim();
+    const lineaLimpia = nombreLinea?.trim();
+    const presentacionLimpia = presentacion?.trim();
+
+    const puedeAutocomponer =
+      Boolean(marcaLimpia) &&
+      Boolean(lineaLimpia) &&
+      Boolean(presentacionLimpia);
+
+    if (puedeAutocomponer) {
+      const sugerencia = `${marcaLimpia} ${lineaLimpia} ${presentacionLimpia}`;
       setValue("denominacion", sugerencia, { shouldValidate: true });
+    } else {
+      setValue("denominacion", "", { shouldValidate: false });
     }
   }, [esAlta, isManual, nombreMarca, nombreLinea, presentacion, setValue]);
 
@@ -168,7 +177,7 @@ export default function RegistrarActualizarProductoForm({
     return () => {
       inputEl.removeEventListener("input", handleInput);
     };
-  }, [esAlta]);
+  });
 
   //=============================== FUNCIONALIDAD ==================================
 
