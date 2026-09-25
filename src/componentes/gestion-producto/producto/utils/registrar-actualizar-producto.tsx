@@ -67,6 +67,8 @@ export default function RegistrarActualizarProductoForm({
     setValue,
     watch,
     setError,
+    clearErrors,
+    getValues,
   } = methods;
 
   console.log("estos son los errores", errors);
@@ -119,65 +121,59 @@ export default function RegistrarActualizarProductoForm({
   const enterToObservacion = useEnterFocus(observacionRef);
   const enterToPrecioOferta = useEnterFocus(precioOfertaRef);
   const enterToDenominacionMarca = useEnterFocus(denominacionMarcaRef);
-  const esAlta = !producto;
-  const [isManual, setIsManual] = useState(false);
-
   const lineaId = watch("lineaId");
   const marcaId = watch("marcaId");
   const presentacion = watch("presentacion");
 
   const nombreMarca =
     selectedMarca?.denominacion ||
-    marcas.find((m) => m.id === marcaId)?.denominacion ||
+    marcas.find((m) => m.id === (getValues("marcaId") ?? marcaId))?.denominacion ||
     "";
   const nombreLinea =
     selectedLinea?.denominacion ||
-    lineas.find((l) => l.id === lineaId)?.denominacion ||
+    lineas.find((l) => l.id === (getValues("lineaId") ?? lineaId))?.denominacion ||
     lineaSeleccionada?.denominacion ||
     "";
 
-  // CR-005: Sugerencia reactiva en alta mientras el campo continúe en modo automático
-  useEffect(() => {
-    if (!esAlta || isManual) return;
-
+  // CR-005: Generación explícita de denominación por botón (Marca + Línea + Presentación)
+  const handleGenerarDenominacion = () => {
+    const presentacionActual = getValues("presentacion") || presentacion;
     const marcaLimpia = nombreMarca?.trim();
     const lineaLimpia = nombreLinea?.trim();
-    const presentacionLimpia = presentacion?.trim();
+    const presentacionLimpia = presentacionActual?.trim();
 
-    const puedeAutocomponer =
-      Boolean(marcaLimpia) &&
-      Boolean(lineaLimpia) &&
-      Boolean(presentacionLimpia);
-
-    if (puedeAutocomponer) {
-      const sugerencia = `${marcaLimpia} ${lineaLimpia} ${presentacionLimpia}`;
-      setValue("denominacion", sugerencia, { shouldValidate: true });
-    } else {
-      setValue("denominacion", "", { shouldValidate: false });
+    if (!marcaLimpia) {
+      setError("denominacion", {
+        type: "manual",
+        message: "Debe seleccionar una Marca para generar la denominación.",
+      });
+      return;
     }
-  }, [esAlta, isManual, nombreMarca, nombreLinea, presentacion, setValue]);
 
-  // CR-005: Detección de edición manual mediante input nativo sin modificar FormInput compartido
-  useEffect(() => {
-    if (!esAlta) return;
+    if (!lineaLimpia) {
+      setError("denominacion", {
+        type: "manual",
+        message: "Debe seleccionar una Línea para generar la denominación.",
+      });
+      return;
+    }
 
-    const inputEl = denominacionProductoRef.current;
-    if (!inputEl) return;
+    if (!presentacionLimpia) {
+      setError("denominacion", {
+        type: "manual",
+        message: "Debe ingresar una Presentación para generar la denominación.",
+      });
+      return;
+    }
 
-    const handleInput = (e: Event) => {
-      const valor = (e.target as HTMLInputElement).value;
-      if (valor.trim() === "") {
-        setIsManual(false);
-      } else {
-        setIsManual(true);
-      }
-    };
+    const denominacionGenerada = `${marcaLimpia} ${lineaLimpia} ${presentacionLimpia}`;
 
-    inputEl.addEventListener("input", handleInput);
-    return () => {
-      inputEl.removeEventListener("input", handleInput);
-    };
-  });
+    clearErrors("denominacion");
+    setValue("denominacion", denominacionGenerada, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
 
   //=============================== FUNCIONALIDAD ==================================
 
@@ -393,7 +389,15 @@ export default function RegistrarActualizarProductoForm({
                       />
                     </div>
 
-                    
+                    <Button
+                      type="button"
+                      onClick={handleGenerarDenominacion}
+                      disabled={producto && producto.sistema > 0 ? true : false}
+                      className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-4 whitespace-nowrap mb-0"
+                      title="Generar denominación"
+                    >
+                      Generar denominación
+                    </Button>
                   </div>
 
                   <FormInput
