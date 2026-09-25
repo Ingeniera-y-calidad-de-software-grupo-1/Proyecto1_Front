@@ -29,6 +29,7 @@ import MarcasSelector from "../componentes/configuracion/marcas-selector";
 import { getUsuarioId } from "../../../../utils/auth";
 import RegistrarActualizarLineaForm from "../../linea/utils/registrar-actualizar-linea";
 import PorcentajeInput from "../../../herramientas/formateo-de-campos/porcentaje-input";
+import { calcularPrecio } from "./calcular-precio";
 
 
 export default function RegistrarActualizarProductoForm({
@@ -97,7 +98,7 @@ export default function RegistrarActualizarProductoForm({
   // Fórmula unificada de dominio para vista previa visual: Precio = Costo * (1 + Margen / 100)
   const costoNum = typeof costo === "number" ? costo : Number(costo) || 0;
   const porcentajeNum = typeof porcentaje === "number" ? porcentaje : Number(porcentaje) || 0;
-  const precioCalculado = costoNum > 0 ? costoNum * (1 + porcentajeNum / 100) : 0;
+  const precioCalculado = calcularPrecio(costoNum, porcentajeNum);
 
   useEffect(() => {
     setValue("precio", precioCalculado, { shouldValidate: true });

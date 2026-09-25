@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1790305672421" clover="3.2.0">
+  <project timestamp="1790305672421" name="All files">
+    <metrics statements="55" coveredstatements="41" conditionals="74" coveredconditionals="22" methods="18" coveredmethods="11" elements="147" coveredelements="74" complexity="0" loc="55" ncloc="55" packages="4" files="4" classes="4"/>
+    <package name="componentes.gestion-producto.producto.interfaces">
+      <metrics statements="16" coveredstatements="12" conditionals="30" coveredconditionals="2" methods="14" coveredmethods="8"/>
+      <file name="interfaces-validaciones-producto.tsx" path="C:\Users\Usuario\Desktop\UTN\INGENIERIA Y CALIDAD DE SOFTWARE\proyecto1\Proyecto1_Front\src\componentes\gestion-producto\producto\interfaces\interfaces-validaciones-producto.tsx">
+        <metrics statements="16" coveredstatements="12" conditionals="30" coveredconditionals="2" methods="14" coveredmethods="8"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="54" count="13" type="stmt"/>
+        <line num="97" count="17" type="cond" truecount="1" falsecount="1"/>
+        <line num="103" count="17" type="cond" truecount="1" falsecount="1"/>
+        <line num="121" count="34" type="stmt"/>
+        <line num="123" count="4" type="stmt"/>
+        <line num="126" count="30" type="stmt"/>
+        <line num="129" count="34" type="stmt"/>
+        <line num="130" count="0" type="stmt"/>
+        <line num="131" count="34" type="stmt"/>
+        <line num="176" count="1" type="stmt"/>
+        <line num="177" count="0" type="stmt"/>
+        <line num="216" count="1" type="stmt"/>
+        <line num="217" count="0" type="stmt"/>
+        <line num="225" count="1" type="stmt"/>
+        <line num="226" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="componentes.gestion-producto.producto.utils">
+      <metrics statements="3" coveredstatements="3" conditionals="8" coveredconditionals="2" methods="1" coveredmethods="1"/>
+      <file name="calcular-precio.ts" path="C:\Users\Usuario\Desktop\UTN\INGENIERIA Y CALIDAD DE SOFTWARE\proyecto1\Proyecto1_Front\src\componentes\gestion-producto\producto\utils\calcular-precio.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="8" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="9" count="7" type="cond" truecount="1" falsecount="3"/>
+        <line num="10" count="7" type="cond" truecount="1" falsecount="3"/>
+        <line num="11" count="7" type="stmt"/>
+      </file>
+    </package>
+    <package name="interfaces.generales">
+      <metrics statements="13" coveredstatements="13" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="interfaces-generales.tsx" path="C:\Users\Usuario\Desktop\UTN\INGENIERIA Y CALIDAD DE SOFTWARE\proyecto1\Proyecto1_Front\src\interfaces\generales\interfaces-generales.tsx">
+        <metrics statements="13" coveredstatements="13" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="75" count="1" type="stmt"/>
+        <line num="80" count="1" type="stmt"/>
+        <line num="89" count="1" type="stmt"/>
+        <line num="97" count="1" type="stmt"/>
+        <line num="104" count="1" type="stmt"/>
+        <line num="109" count="1" type="stmt"/>
+        <line num="114" count="1" type="stmt"/>
+        <line num="120" count="1" type="stmt"/>
+        <line num="131" count="1" type="stmt"/>
+        <line num="137" count="1" type="stmt"/>
+        <line num="172" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="utils">
+      <metrics statements="23" coveredstatements="13" conditionals="36" coveredconditionals="18" methods="3" coveredmethods="2"/>
+      <file name="errores.ts" path="C:\Users\Usuario\Desktop\UTN\INGENIERIA Y CALIDAD DE SOFTWARE\proyecto1\Proyecto1_Front\src\utils\errores.ts">
+        <metrics statements="23" coveredstatements="13" conditionals="36" coveredconditionals="18" methods="3" coveredmethods="2"/>
+        <line num="3" count="9" type="stmt"/>
+        <line num="5" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="6" count="6" type="cond" truecount="3" falsecount="1"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="9" count="6" type="stmt"/>
+        <line num="12" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="15" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="18" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="19" count="0" type="cond" truecount="0" falsecount="5"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="27" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="31" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="34" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="41" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="43" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="50" count="1" type="cond" truecount="2" falsecount="2"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
