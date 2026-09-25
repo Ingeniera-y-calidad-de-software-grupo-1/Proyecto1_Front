@@ -37,6 +37,16 @@ export function DatosCard({
         </p>
       </div>
 
+      {/* Presentación */}
+      {producto.presentacion && (
+        <div className="mb-2">
+          <p className="text-xs text-gray-500">Presentación</p>
+          <p className="text-sm font-medium text-gray-800">
+            {producto.presentacion}
+          </p>
+        </div>
+      )}
+
       {/* Proveedor */}
 {/*       <div className="mb-2">
         <p className="text-xs text-gray-500">Proveedor</p>

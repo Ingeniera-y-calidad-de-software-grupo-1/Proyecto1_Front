@@ -9,6 +9,7 @@ import { ItemProdAlternativo } from "../../../../interfaces/gestion-producto/pro
 
 export interface FormValues {
   denominacion: string;
+  presentacion: string;
   observacion?: string | null;
   codigoProveedor?: string | null;
   codigoReferencia?: string | null;
@@ -59,6 +60,11 @@ export const schema = (utilizaStockMinimo: boolean, utilizaPack: boolean, usaOfe
       .required("La denominación es obligatoria.")
       .max(255, "Máximo 255 caracteres.")
       .matches(/^[\w áéíóúÁÉÍÓÚñÑ.\-/%]+$/, "La denominación contiene caracteres inválidos."),
+    presentacion: yup
+      .string()
+      .trim()
+      .required("La presentación es obligatoria.")
+      .max(50, "La presentación no puede superar los 50 caracteres."),
     observacion: yup.string().optional().nullable(),
     codigoProveedor: yup.string().optional().nullable(),
     codigoReferencia: yup.string().optional().nullable(),
@@ -176,6 +182,7 @@ export const schema = (utilizaStockMinimo: boolean, utilizaPack: boolean, usaOfe
 export const transformData = (producto: Producto): FormValues => {
   return {
     denominacion: producto.denominacion,
+    presentacion: producto.presentacion ?? "",
     observacion: producto.observacion ?? null,
     codigoProveedor: producto.codigoProveedor ?? "",
     codigoReferencia: producto.codigoReferencia ?? "",

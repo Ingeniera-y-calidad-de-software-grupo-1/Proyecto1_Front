@@ -155,6 +155,7 @@ export default function RegistrarActualizarProductoForm({
 
           
           setValue("denominacion", producto.denominacion || "");
+          setValue("presentacion", producto.presentacion || "");
           setValue("observacion", producto.observacion || null);
           setValue("codigoProveedor", producto.codigoProveedor || "");
           setValue("codigoBarra", producto.codigoBarra || null);
@@ -335,6 +336,13 @@ export default function RegistrarActualizarProductoForm({
 
                     
                   </div>
+
+                  <FormInput
+                    name="presentacion"
+                    label="Presentación"
+                    placeholder="Ej: 1L, 750 cc, 500 g"
+                    disabled={producto && producto.sistema > 0 ? true : false}
+                  />
 
                   <FormInput
                     name="codigoProveedor"

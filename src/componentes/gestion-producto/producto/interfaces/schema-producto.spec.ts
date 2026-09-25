@@ -11,6 +11,7 @@ describe('CR-001 - Yup Schema de Producto (schema)', () => {
     marcaId: 1,
     lineaId: 1,
     alicuotaIva: AlicuotaIva.ALICUOTA_21,
+    presentacion: '1L',
   };
 
   it('debe aceptar una denominacion válida', async () => {
@@ -167,3 +168,85 @@ describe('CR-001 - Yup Schema de Producto (schema)', () => {
     expect(resPrecioNull).toBeDefined();
   });
 });
+
+describe('CR-002 - Yup Schema de Producto: Validación de Presentación', () => {
+  const baseProductoValido = {
+    denominacion: 'Cerveza Rubia Especial',
+    costo: 1000,
+    porcentaje: 15,
+    stock: 50,
+    marcaId: 1,
+    lineaId: 1,
+    alicuotaIva: AlicuotaIva.ALICUOTA_21,
+    presentacion: '1L',
+  };
+
+  it('TP-01: debe aceptar una presentación válida "1L"', async () => {
+    const validSchema = schema(false, false, false);
+    const resultado = await validSchema.validate({
+      ...baseProductoValido,
+      presentacion: '1L',
+    });
+    expect(resultado.presentacion).toBe('1L');
+  });
+
+  it('TP-02: debe aplicar trim() a la presentación', async () => {
+    const validSchema = schema(false, false, false);
+    const resultado = await validSchema.validate({
+      ...baseProductoValido,
+      presentacion: '  Botella 750 cc  ',
+    });
+    expect(resultado.presentacion).toBe('Botella 750 cc');
+  });
+
+  it('TP-03: debe rechazar presentación vacía ""', async () => {
+    const validSchema = schema(false, false, false);
+    await expect(
+      validSchema.validate({
+        ...baseProductoValido,
+        presentacion: '',
+      }),
+    ).rejects.toThrow('La presentación es obligatoria.');
+  });
+
+  it('TP-04: debe rechazar presentación compuesta sólo por espacios "   "', async () => {
+    const validSchema = schema(false, false, false);
+    await expect(
+      validSchema.validate({
+        ...baseProductoValido,
+        presentacion: '   ',
+      }),
+    ).rejects.toThrow('La presentación es obligatoria.');
+  });
+
+  it('TP-06: debe rechazar presentación de más de 50 caracteres', async () => {
+    const validSchema = schema(false, false, false);
+    await expect(
+      validSchema.validate({
+        ...baseProductoValido,
+        presentacion: 'a'.repeat(51),
+      }),
+    ).rejects.toThrow('La presentación no puede superar los 50 caracteres.');
+  });
+
+  it('TP-07: debe aceptar presentación de exactamente 50 caracteres', async () => {
+    const validSchema = schema(false, false, false);
+    const texto50 = 'a'.repeat(50);
+    const resultado = await validSchema.validate({
+      ...baseProductoValido,
+      presentacion: texto50,
+    });
+    expect(resultado.presentacion).toBe(texto50);
+  });
+
+  it('TP-10: debe bloquear el guardado si falta el campo presentacion', async () => {
+    const validSchema = schema(false, false, false);
+    const payloadSinPresentacion = { ...baseProductoValido };
+    delete (payloadSinPresentacion as any).presentacion;
+
+    await expect(
+      validSchema.validate(payloadSinPresentacion),
+    ).rejects.toThrow('La presentación es obligatoria.');
+  });
+});
+

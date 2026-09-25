@@ -8,6 +8,7 @@ export interface Producto {
   //
   id: number;
   denominacion: string;
+  presentacion: string;
   codigoProveedor?: string | null;
   codigoReferencia?: string | null;
   codigoBarra?: string | null;
@@ -68,6 +69,7 @@ export interface Producto {
 export interface ConsultarProducto {
   id: number;
   denominacion: string;
+  presentacion: string;
   codigoProveedor: string;
   codigoReferencia: string;
   stock: number;
@@ -138,6 +140,7 @@ export interface SelectProdAlternativos {
 export interface ProductoSeleccionado {
   id: number;
   denominacion: string;
+  presentacion?: string;
   codigoProveedorDenominacion: string;
   codigoProveedor: string;
   codigoReferencia: string;

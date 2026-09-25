@@ -519,6 +519,14 @@ export default function ConsultarProductos() {
       scrollable: false,
     },
     {
+      header: "Presentación",
+      accessor: "presentacion",
+      flex: 0.6,
+      type: "text",
+      editable: false,
+      scrollable: false,
+    },
+    {
       header: "Precio", 
       accessor:"precio",
       flex:0.3,
