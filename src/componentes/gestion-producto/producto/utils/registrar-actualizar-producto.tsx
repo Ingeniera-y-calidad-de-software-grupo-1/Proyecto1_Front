@@ -119,6 +119,56 @@ export default function RegistrarActualizarProductoForm({
   const enterToObservacion = useEnterFocus(observacionRef);
   const enterToPrecioOferta = useEnterFocus(precioOfertaRef);
   const enterToDenominacionMarca = useEnterFocus(denominacionMarcaRef);
+  const esAlta = !producto;
+  const [isManual, setIsManual] = useState(false);
+
+  const lineaId = watch("lineaId");
+  const marcaId = watch("marcaId");
+  const presentacion = watch("presentacion");
+
+  const nombreMarca =
+    marcas.find((m) => m.id === marcaId)?.denominacion ||
+    selectedMarca?.denominacion ||
+    "";
+  const nombreLinea =
+    lineas.find((l) => l.id === lineaId)?.denominacion ||
+    selectedLinea?.denominacion ||
+    lineaSeleccionada?.denominacion ||
+    "";
+
+  // CR-005: Sugerencia reactiva en alta mientras el campo continúe en modo automático
+  useEffect(() => {
+    if (esAlta && !isManual) {
+      const sugerencia = [nombreMarca, nombreLinea, presentacion]
+        .map((v) => v?.trim())
+        .filter(Boolean)
+        .join(" ");
+
+      setValue("denominacion", sugerencia, { shouldValidate: true });
+    }
+  }, [esAlta, isManual, nombreMarca, nombreLinea, presentacion, setValue]);
+
+  // CR-005: Detección de edición manual mediante input nativo sin modificar FormInput compartido
+  useEffect(() => {
+    if (!esAlta) return;
+
+    const inputEl = denominacionProductoRef.current;
+    if (!inputEl) return;
+
+    const handleInput = (e: Event) => {
+      const valor = (e.target as HTMLInputElement).value;
+      if (valor.trim() === "") {
+        setIsManual(false);
+      } else {
+        setIsManual(true);
+      }
+    };
+
+    inputEl.addEventListener("input", handleInput);
+    return () => {
+      inputEl.removeEventListener("input", handleInput);
+    };
+  }, [esAlta]);
 
   //=============================== FUNCIONALIDAD ==================================
 
@@ -543,6 +593,7 @@ export default function RegistrarActualizarProductoForm({
                 onLineaChange={(linea) => {
                   methods.setValue("lineaId", linea?.id || 0);
                   setLineaSeleccionada(linea as any);
+                  setSelectedLinea(linea as any);
                 }}
                 onAgregarLinea={() => setMostrarFormularioLinea(true)}
               />
@@ -560,6 +611,7 @@ export default function RegistrarActualizarProductoForm({
                 onEnterMarca={(e) => handleEnterEnSelect(e, "MARCA")}
                 onChangeMarca={(marca) => {
                   methods.setValue("marcaId", marca?.id || 0);
+                  setSelectedMarca(marca as any);
                 }}
                 onAgregarMarca={() => setMostrarFormularioMarca(true)}
               />
