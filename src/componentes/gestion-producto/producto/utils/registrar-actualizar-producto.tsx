@@ -29,7 +29,7 @@ import MarcasSelector from "../componentes/configuracion/marcas-selector";
 import { getUsuarioId } from "../../../../utils/auth";
 import RegistrarActualizarLineaForm from "../../linea/utils/registrar-actualizar-linea";
 import PorcentajeInput from "../../../herramientas/formateo-de-campos/porcentaje-input";
-import { calcularPrecio } from "./calcular-precio";
+import { calcularPrecio, huboCambioEfectivoPrecio } from "./calcular-precio";
 
 
 export default function RegistrarActualizarProductoForm({
@@ -101,6 +101,9 @@ export default function RegistrarActualizarProductoForm({
   const costoNum = typeof costo === "number" ? costo : Number(costo) || 0;
   const porcentajeNum = typeof porcentaje === "number" ? porcentaje : Number(porcentaje) || 0;
   const precioCalculado = calcularPrecio(costoNum, porcentajeNum);
+
+  const precioOriginal = producto ? Number(producto.precio) || 0 : 0;
+  const hayCambioPrecio = !!producto && huboCambioEfectivoPrecio(precioOriginal, precioCalculado);
 
   useEffect(() => {
     setValue("precio", precioCalculado, { shouldValidate: true });
@@ -258,6 +261,24 @@ export default function RegistrarActualizarProductoForm({
       }
 
       if (producto) {
+        if (hayCambioPrecio) {
+          const motivo = getValues("motivoCambioPrecio")?.trim();
+          if (!motivo) {
+            setError("motivoCambioPrecio", {
+              type: "manual",
+              message: "Debe ingresar un motivo para el cambio de precio.",
+            });
+            return;
+          }
+          if (motivo.length > 255) {
+            setError("motivoCambioPrecio", {
+              type: "manual",
+              message: "El motivo no puede superar los 255 caracteres.",
+            });
+            return;
+          }
+        }
+
         const payload = {
           ...formData,
           usuarioUpdatedId: usuarioId,
@@ -470,6 +491,16 @@ export default function RegistrarActualizarProductoForm({
                     maxDigits={9}
                     disabled={true}
                   />
+
+                  {producto && hayCambioPrecio && (
+                    <div className="col-span-full">
+                      <FormInput
+                        name="motivoCambioPrecio"
+                        label="Motivo del cambio de precio *"
+                        placeholder="Ingrese el motivo por el cual cambia el precio (obligatorio)"
+                      />
+                    </div>
+                  )}
 
                   
 

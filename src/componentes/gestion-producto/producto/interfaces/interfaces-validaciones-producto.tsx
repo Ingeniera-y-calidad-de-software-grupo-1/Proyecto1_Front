@@ -32,6 +32,7 @@ export interface FormValues {
   cantidadPorPack?: number;
   utilizaStockMinimo?: boolean;
   utilizaPack?: boolean;
+  motivoCambioPrecio?: string;
  /*  porcentajeOcasional: number;
   precioOcasional: number;
   porcentajeMayorista: number;
@@ -90,6 +91,12 @@ export const schema = (utilizaStockMinimo: boolean, utilizaPack: boolean, usaOfe
       .number()
       .typeError("El porcentaje debe ser un valor numérico.")
       .min(0, "El porcentaje mínimo debe ser mayor o igual a 0.")
+      .optional()
+      .nullable(),
+    motivoCambioPrecio: yup
+      .string()
+      .trim()
+      .max(255, "El motivo no puede superar los 255 caracteres.")
       .optional()
       .nullable(),
     /* costoEnDolar: yup.boolean().optional().nullable(),

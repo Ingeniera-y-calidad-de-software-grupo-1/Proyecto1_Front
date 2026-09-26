@@ -38,3 +38,12 @@ export interface ConsultarHistorialPrecios {
   precioOferta: number;
   precioOfertaNuevo: number;
 }
+
+export interface HistorialPrecioItem {
+  id: number;
+  productoId: number;
+  precioAnterior: number;
+  precioNuevo: number;
+  fecha: string;
+  motivo: string;
+}

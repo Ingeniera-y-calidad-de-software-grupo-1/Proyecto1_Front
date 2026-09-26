@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularPrecio } from './calcular-precio';
+import { calcularPrecio, redondear5, huboCambioEfectivoPrecio } from './calcular-precio';
 
 describe('CR-001 - Cálculo de Precio (calcularPrecio)', () => {
   it('debe calcular correctamente 1000 + 15% = 1150', () => {
@@ -36,5 +36,32 @@ describe('CR-001 - Cálculo de Precio (calcularPrecio)', () => {
     const precioConDecimales = calcularPrecio(12.5, 15);
     expect(precioConDecimales).toBeCloseTo(14.375, 4);
     expect(precioConDecimales).not.toBe(14); // Verifica que NO redondeará a entero
+  });
+});
+
+describe('CR-007 - Precisión de 5 decimales (redondear5 y huboCambioEfectivoPrecio)', () => {
+  it('debe redondear números a 5 decimales consistentemente', () => {
+    expect(redondear5(10.123456)).toBe(10.12346);
+    expect(redondear5(10.123454)).toBe(10.12345);
+    expect(redondear5(10.1)).toBe(10.1);
+  });
+
+  it('no debe detectar cambio efectivo si la diferencia es menor al quinto decimal', () => {
+    // Diferencia en el 6to decimal
+    const cambio = huboCambioEfectivoPrecio(10.123451, 10.123454);
+    expect(cambio).toBe(false);
+  });
+
+  it('debe detectar cambio efectivo si la diferencia está en el quinto decimal o superior', () => {
+    const cambio = huboCambioEfectivoPrecio(10.12345, 10.12346);
+    expect(cambio).toBe(true);
+
+    const cambioEntero = huboCambioEfectivoPrecio(100, 120);
+    expect(cambioEntero).toBe(true);
+  });
+
+  it('no debe detectar cambio efectivo cuando los precios son idénticos', () => {
+    expect(huboCambioEfectivoPrecio(150, 150)).toBe(false);
+    expect(huboCambioEfectivoPrecio(0, 0)).toBe(false);
   });
 });
