@@ -18,6 +18,7 @@ import { getUsuarioId } from "../../../../../utils/auth";
 import { useCambioPrecios } from "../hooks/useCambioPrecios";
 import TablaCambioPrecios from "../componentes/tabla-cambio-precios";
 import FiltrosCambioPrecios from "../componentes/filtros-cambio-precios";
+import LineaService from "../../../linea/services/linea-service";
 
 export default function CambioPreciosMasivo() {
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,32 @@ export default function CambioPreciosMasivo() {
     setBuscar({ cont: 0, componente: "cambio-precios-masivo" });
     setFiltrosNecesarios({ marca: true, linea: true, sublinea: true });
   }, []);
+
+  useEffect(() => {
+  const cargarLineasCR006 = async () => {
+    try {
+      const response = await LineaService.obtener({
+        denominacion: "",
+        skip: 0,
+        take: 1000,
+      });
+
+      setLineas(response.data);
+    } catch (error) {
+      console.error("Error al cargar líneas:", error);
+
+      addAlert({
+        type: TipoAlerta.ERROR,
+        title: TituloAlerta.ERROR,
+        message: "No se pudieron cargar las líneas.",
+        autoClose: true,
+        duration: 3000,
+      });
+    }
+  };
+
+  cargarLineasCR006();
+}, []);
 
   const fetchMarcas = useCallback(async () => {
     setError(null);
@@ -107,6 +134,10 @@ export default function CambioPreciosMasivo() {
 
   useEffect(() => {
     const fetchSublineas = async () => {
+      console.log(
+  "DEBUG SUBLINEAS - valoresFiltros.lineaId:",
+  valoresFiltros.lineaId
+);
       setError(null);
       try {
         if (valoresFiltros.lineaId && valoresFiltros.lineaId !== 0) {
@@ -198,6 +229,95 @@ export default function CambioPreciosMasivo() {
     },
     [addAlert, actualizarProductoLocal]
   );
+
+const handleActualizacionMasiva = useCallback(
+  async (datos: {
+    tipo: "porcentaje" | "monto";
+    valor: number;
+    alcance: "global" | "linea";
+    lineaId?: number;
+  }) => {
+    if (!usuarioId) {
+      addAlert({
+        type: TipoAlerta.ERROR,
+        title: TituloAlerta.ERROR,
+        message: "No se pudo identificar al usuario.",
+        autoClose: true,
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (datos.alcance === "linea" && !datos.lineaId) {
+      addAlert({
+        type: TipoAlerta.ERROR,
+        title: TituloAlerta.ERROR,
+        message: "Debe seleccionar una línea.",
+        autoClose: true,
+        duration: 3000,
+      });
+      return;
+    }
+
+    const confirmed = await showConfirmation({
+      type: TipoAlertaConfirmacion.DESTRUCTIVE,
+      title: "Confirmar actualización masiva",
+      message:
+        datos.alcance === "global"
+          ? `Se actualizarán los precios de todos los productos activos. ¿Desea continuar?`
+          : `Se actualizarán los precios de los productos de la línea seleccionada. ¿Desea continuar?`,
+      confirmText: "Actualizar",
+      cancelText: "Cancelar",
+      onConfirm: () => {},
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const response =
+        await CambioPreciosMasivoService.actualizarPreciosMasivamente({
+          ...datos,
+          usuarioId,
+        });
+
+      addAlert({
+        type: TipoAlerta.SUCCESS,
+        title: TituloAlerta.SUCCESS,
+        message:
+          response?.mensaje ??
+          "Los precios se actualizaron correctamente.",
+        autoClose: true,
+        duration: 3000,
+      });
+
+      if (productos.length > 0) {
+        await buscarProductos({
+          marcaId: valoresFiltros.marcaId,
+          lineaId: valoresFiltros.lineaId,
+          subLineaId: valoresFiltros.sublineaId,
+        });
+      }
+    } catch (error: any) {
+      addAlert({
+        type: TipoAlerta.ERROR,
+        title: TituloAlerta.ERROR,
+        message:
+          error?.response?.data?.message ??
+          "No se pudieron actualizar los precios.",
+        autoClose: true,
+        duration: 5000,
+      });
+    }
+  },
+  [
+    usuarioId,
+    addAlert,
+    showConfirmation,
+    productos.length,
+    buscarProductos,
+    valoresFiltros,
+  ]
+);
 
   const handleGuardarCambios = useCallback(async () => {
     const response = await guardarCambios();
@@ -358,6 +478,7 @@ export default function CambioPreciosMasivo() {
                 fetchMarcas={fetchMarcas}
                 fetchLineas={fetchLineas}
                 onLimpiarFiltros={handleLimpiarFiltros}
+                onActualizacionMasiva={handleActualizacionMasiva}
               />
               <CardContent className="p-0">
                 <TablaCambioPrecios

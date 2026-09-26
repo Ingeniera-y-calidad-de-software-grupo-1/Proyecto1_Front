@@ -12,10 +12,7 @@ export function useCambioPrecios(usuarioId: number | null) {
     setLoading(true);
 
     const productosFiltrados =
-      await CambioPreciosMasivoService.obtenerDesde(
-        filtros,
-        "productos"
-      );
+    await CambioPreciosMasivoService.buscarProductos(filtros);
 
     setProductos(productosFiltrados.data);
     setLoading(false);

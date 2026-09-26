@@ -19,6 +19,13 @@ type Props = {
     fetchMarcas: () => void;
     fetchLineas: () => void;
     onLimpiarFiltros: () => void;
+
+    onActualizacionMasiva: (datos: {
+      tipo: "porcentaje" | "monto";
+      valor: number;
+      alcance: "global" | "linea";
+      lineaId?: number;
+    }) => void;
 };
 
 export default function FiltrosCambioPrecios({
@@ -33,9 +40,14 @@ export default function FiltrosCambioPrecios({
   onGuardarCambios,
   fetchMarcas,
   fetchLineas,
-  onLimpiarFiltros
+  onLimpiarFiltros,
+  onActualizacionMasiva,
 }: Props) {
   const [porcentaje, setPorcentaje] = useState<number>(0);
+  const [tipoAjuste, setTipoAjuste] = useState<"porcentaje" | "monto">("porcentaje");
+  const [valorAjuste, setValorAjuste] = useState<number>(0);
+  const [alcance, setAlcance] = useState<"global" | "linea">("global");
+  const [lineaIdAjuste, setLineaIdAjuste] = useState<number | undefined>(undefined);
   return (
     <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
                 {/* Filtros y estadísticas */}
@@ -247,6 +259,105 @@ export default function FiltrosCambioPrecios({
                     </Button>
                   </div> */}
 
+                    {/* CR006 - Actualización masiva de precios */}
+<div className="w-full border-t pt-4 mt-2">
+  <div className="flex flex-wrap items-end gap-4">
+
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium">
+        Tipo de ajuste
+      </label>
+
+      <select
+        value={tipoAjuste}
+        onChange={(e) =>
+          setTipoAjuste(e.target.value as "porcentaje" | "monto")
+        }
+        className="border rounded px-3 py-2 bg-white text-black"
+      >
+        <option value="porcentaje">Porcentaje</option>
+        <option value="monto">Monto</option>
+      </select>
+    </div>
+
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium">
+        Valor
+      </label>
+
+      <Input
+        type="number"
+        value={valorAjuste}
+        onChange={(e) => setValorAjuste(Number(e.target.value))}
+        className="w-32 bg-white text-black"
+      />
+    </div>
+
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium">
+        Alcance
+      </label>
+
+      <select
+        value={alcance}
+        onChange={(e) =>
+          setAlcance(e.target.value as "global" | "linea")
+        }
+        className="border rounded px-3 py-2 bg-white text-black"
+      >
+        <option value="global">Global</option>
+        <option value="linea">Por línea</option>
+      </select>
+    </div>
+
+    {alcance === "linea" && (
+  <div className="flex flex-col gap-1 min-w-[220px]">
+    <label className="text-sm font-medium">
+      Línea
+    </label>
+
+    <Select
+      value={
+        (lineas ?? []).find(
+          (option) => option.id === lineaIdAjuste
+        ) || null
+      }
+      options={lineas ?? []}
+      getOptionLabel={(option) => option.denominacion}
+      getOptionValue={(option) => String(option.id)}
+      onChange={(option) =>
+        setLineaIdAjuste(option ? option.id : undefined)
+      }
+      placeholder="Seleccione una línea"
+      className="text-black"
+    />
+  </div>
+)}
+
+    <Button
+      type="button"
+      onClick={() =>
+  onActualizacionMasiva({
+    tipo: tipoAjuste,
+    valor: valorAjuste,
+    alcance,
+    lineaId:
+      alcance === "linea"
+        ? lineaIdAjuste
+        : undefined,
+  })
+}
+      className="bg-blue-500 text-white hover:bg-blue-800"
+      disabled={
+  valorAjuste === 0 ||
+  (alcance === "linea" && !lineaIdAjuste)
+}
+    >
+      Actualizar precios
+    </Button>
+
+  </div>
+</div>
                   <div className="flex gap-4 items-end flex-grow">
                      <Button
                       variant="outline"
