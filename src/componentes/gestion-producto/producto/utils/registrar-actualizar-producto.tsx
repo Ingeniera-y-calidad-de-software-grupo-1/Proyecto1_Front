@@ -102,7 +102,29 @@ export default function RegistrarActualizarProductoForm({
   const porcentajeNum = typeof porcentaje === "number" ? porcentaje : Number(porcentaje) || 0;
   const precioCalculado = calcularPrecio(costoNum, porcentajeNum);
 
-  const precioOriginal = producto ? Number(producto.precio) || 0 : 0;
+  // CR-007: Guardar al abrir el formulario un precio inicial inmutable derivado del estado inicial real del producto
+  const ultimoProductoIdRef = useRef<number | null>(null);
+  const precioInicialRef = useRef<number | null>(null);
+
+  const prodKey = producto ? (producto.id ?? 1) : null;
+  if (producto && prodKey !== ultimoProductoIdRef.current) {
+    ultimoProductoIdRef.current = prodKey;
+    const costoInicial = producto.costo != null ? Number(producto.costo) || 0 : 0;
+    const porcentajeInicial = producto.porcentaje != null ? Number(producto.porcentaje) || 0 : 0;
+    const precioCalculadoInicial = calcularPrecio(costoInicial, porcentajeInicial);
+
+    if (costoInicial > 0) {
+      precioInicialRef.current = precioCalculadoInicial;
+    } else if (producto.precio != null && Number(producto.precio) > 0) {
+      precioInicialRef.current = Number(producto.precio);
+    } else {
+      precioInicialRef.current = precioCalculadoInicial;
+    }
+  }
+
+  const precioOriginal = producto
+    ? (precioInicialRef.current ?? (Number(producto.precio) || 0))
+    : 0;
   const hayCambioPrecio = !!producto && huboCambioEfectivoPrecio(precioOriginal, precioCalculado);
 
   useEffect(() => {

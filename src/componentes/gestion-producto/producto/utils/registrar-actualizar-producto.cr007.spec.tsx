@@ -123,4 +123,45 @@ describe("CR-007 Frontend: Motivo del cambio de precio", () => {
       expect(payloadEnviado.motivoCambioPrecio).toBe("Aumento de costos de importación");
     });
   });
+
+  it("TP-CR007-F05: edición con costo 1000, margen 110, precio inicial 2100 -> al cambiar margen a 120 (precio nuevo 2200) DEBE aparecer 'Motivo del cambio de precio'", async () => {
+    const mockProductoExacto = {
+      id: 101,
+      denominacion: "Producto Test 1000",
+      presentacion: "1U",
+      marca: { id: 1, denominacion: "Marca Test" },
+      linea: { id: 2, denominacion: "Linea Test" },
+      stock: 10,
+      costo: 1000,
+      porcentaje: 110,
+      precio: 2100,
+      alicuotaIva: 21,
+      sistema: 0,
+      codigoProveedor: "COD-TEST-01",
+    };
+
+    const { container } = render(
+      <RegistrarActualizarProductoForm {...defaultProps} producto={mockProductoExacto as any} />
+    );
+
+    // Con costo 1000 y margen 110 (precio 2100), no debe aparecer el campo motivo
+    expect(
+      screen.queryByPlaceholderText("Ingrese el motivo por el cual cambia el precio (obligatorio)"),
+    ).toBeNull();
+
+    // Modificar margen a 120 (precio calculado pasa a 2200)
+    const margenInput = container.querySelector('input[name="porcentaje"]') as HTMLInputElement;
+    expect(margenInput).not.toBeNull();
+    fireEvent.change(margenInput, { target: { value: "120" } });
+
+    // Debe mostrarse el input de motivo antes del submit
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("Ingrese el motivo por el cual cambia el precio (obligatorio)"),
+      ).toBeDefined();
+    });
+
+    expect(screen.getByText(/Motivo del cambio de precio/i)).toBeDefined();
+  });
 });
+
